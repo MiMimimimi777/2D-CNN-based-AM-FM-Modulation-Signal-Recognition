@@ -1,0 +1,13 @@
+环境 python3+
+
+1.
+找到项目目录(如:"c:\Users\mimi\Desktop\trae_project1\基于CNN的AM_FM调制方式识别")
+
+打开cmd,输入(   cd "c:\Users\mimi\Desktop\trae_project1\基于CNN的AM_FM调制方式识别"
+
+2.
+运行Flask sever
+cmd输入(   python app.py
+
+3.
+访问   http://127.0.0.1:5000

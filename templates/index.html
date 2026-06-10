@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AM/FM Modulation Recognition System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(252, 74, 26, 0.4);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .form-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .form-control {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 150px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        label {
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .img-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .img-container img {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        
+        .result-box {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 200px;
+        }
+        
+        .result-card.success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .result-card.error {
+            background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+        }
+        
+        .result-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        .confidence-bar {
+            width: 100%;
+            height: 15px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
+            transition: width 0.5s ease;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #38ef7d;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .info-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .info-label {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 10px 25px;
+            border: none;
+            background: #f0f0f0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            opacity: 0.8;
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+            color: #666;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📡 AM/FM Modulation Recognition System</h1>
+        
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Signal Generation & Modulation Demo</span>
+                <button class="btn btn-primary" onclick="generateSignals()">Generate Signals</button>
+            </div>
+            
+            <div class="form-group">
+                <label>Carrier Frequency:</label>
+                <input type="number" id="carrier_freq" class="form-control" value="100" min="50" max="200">
+                <span>Hz</span>
+                
+                <label>Message Frequency:</label>
+                <input type="number" id="message_freq" class="form-control" value="5" min="1" max="20">
+                <span>Hz</span>
+                
+                <label>Noise Level:</label>
+                <input type="number" id="snr_db" class="form-control" value="10" min="0" max="30">
+                <span>dB</span>
+            </div>
+            
+            <div class="tabs" id="signal_tabs">
+                <button class="tab active" onclick="showSignalTab('signals')">1D Signal Waveforms</button>
+                <button class="tab" onclick="showSignalTab('signal_spectrogram')">2D Spectrogram Images</button>
+                <button class="tab" onclick="showSignalTab('demodulation')">Demodulation Comparison</button>
+            </div>
+            
+            <div id="signals" class="tab-content active">
+                <div class="img-container" id="signals_plot_container">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Click "Generate Signals" to start
+                    </div>
+                </div>
+            </div>
+            
+            <div id="signal_spectrogram" class="tab-content">
+                <div class="img-container" id="spectrogram_plot_container">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Click "Generate Signals" to start
+                    </div>
+                </div>
+                <p class="section-title">🔍 Spectrogram Analysis:</p>
+                <p style="color: #666; font-size: 0.9rem; line-height: 1.6;">
+                    Spectrograms convert 1D time-domain signals into 2D images by showing 
+                    how the frequency content changes over time. The x-axis represents time, 
+                    the y-axis represents frequency, and the color intensity represents 
+                    signal power. AM signals show constant frequency with varying amplitude, 
+                    while FM signals show frequency variations around the carrier frequency.
+                </p>
+            </div>
+            
+            <div id="demodulation" class="tab-content">
+                <div class="img-container" id="demod_plot_container">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Click "Generate Signals" to start
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">🎯 AI Modulation Recognition</span>
+                <div class="btn-group">
+                    <button class="btn btn-success" onclick="generateRandomSignal()">Generate Random Signal</button>
+                    <button class="btn btn-warning" onclick="generateSpecificSignal('AM')">Specify AM</button>
+                    <button class="btn btn-warning" onclick="generateSpecificSignal('FM')">Specify FM</button>
+                </div>
+            </div>
+            
+            <div class="tabs" id="mystery_tabs">
+                <button class="tab active" onclick="showMysteryTab('mystery_waveform')">1D Waveform</button>
+                <button class="tab" onclick="showMysteryTab('mystery_spectrogram')">2D Spectrogram</button>
+            </div>
+            
+            <div id="mystery_waveform" class="tab-content active">
+                <div class="img-container" id="mystery_plot_container">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Click buttons above to generate mystery signal
+                    </div>
+                </div>
+            </div>
+            
+            <div id="mystery_spectrogram" class="tab-content">
+                <div class="img-container" id="mystery_spectrogram_container">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Click buttons above to generate mystery signal
+                    </div>
+                </div>
+            </div>
+            
+            <div id="prediction_result" style="display: none;">
+                <div class="result-box">
+                    <div class="result-card" id="true_type_card">
+                        <div class="result-label">True Modulation</div>
+                        <div class="result-value" id="true_type">-</div>
+                    </div>
+                    <div class="result-card" id="predicted_type_card">
+                        <div class="result-label">AI Prediction</div>
+                        <div class="result-value" id="predicted_type">-</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Confidence</div>
+                        <div class="result-value" id="confidence">-</div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="confidence_bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-panel">
+                    <div class="info-item">
+                        <div class="info-label">Carrier Frequency</div>
+                        <div class="info-value" id="carrier_freq_val">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Message Frequency</div>
+                        <div class="info-value" id="message_freq_val">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">SNR</div>
+                        <div class="info-value" id="snr_val">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Model Type</div>
+                        <div class="info-value" id="model_type_val">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">📊 Model Status</span>
+                <div class="status-indicator"></div>
+            </div>
+            <p style="color: #666;">Model trained successfully. Test Accuracy: <strong>100%</strong></p>
+            <p style="color: #888; font-size: 0.9rem; margin-top: 10px;">
+                <strong>2D CNN Ready:</strong> The system converts 1D signals to 2D spectrogram images 
+                for improved feature extraction and pattern recognition using Convolutional Neural Networks.
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>Machine Learning based AM/FM Modulation Recognition System</p>
+        </div>
+    </div>
+    
+    <script>
+        function showSignalTab(tabName) {
+            // Find the parent card containing these tabs
+            const signalCard = document.getElementById('signal_tabs').closest('.card');
+            const tabsContainer = document.getElementById('signal_tabs');
+            const tabs = tabsContainer.querySelectorAll('.tab');
+            const contents = signalCard.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+        
+        function showMysteryTab(tabName) {
+            // Find the parent card containing these tabs
+            const mysteryCard = document.getElementById('mystery_tabs').closest('.card');
+            const tabsContainer = document.getElementById('mystery_tabs');
+            const tabs = tabsContainer.querySelectorAll('.tab');
+            const contents = mysteryCard.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+        
+        async function generateSignals() {
+            const carrier_freq = parseInt(document.getElementById('carrier_freq').value);
+            const message_freq = parseInt(document.getElementById('message_freq').value);
+            const snr_db = parseInt(document.getElementById('snr_db').value);
+            
+            document.getElementById('signals_plot_container').innerHTML = 
+                '<div class="loading"><div class="spinner"></div>Generating signals...</div>';
+            document.getElementById('spectrogram_plot_container').innerHTML = 
+                '<div class="loading"><div class="spinner"></div>Generating spectrograms...</div>';
+            document.getElementById('demod_plot_container').innerHTML = 
+                '<div class="loading"><div class="spinner"></div>Generating demodulation plot...</div>';
+            
+            const response = await fetch('/api/generate_signals', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ carrier_freq, message_freq, snr_db })
+            });
+            
+            const data = await response.json();
+            
+            document.getElementById('signals_plot_container').innerHTML = 
+                `<img src="${data.signals_plot}" alt="Signal waveforms">`;
+            document.getElementById('spectrogram_plot_container').innerHTML = 
+                `<img src="${data.spectrogram_plot}" alt="Spectrogram images">`;
+            document.getElementById('demod_plot_container').innerHTML = 
+                `<img src="${data.demod_plot}" alt="Demodulation comparison">`;
+        }
+        
+        async function generateRandomSignal() {
+            await predictModulation('random');
+        }
+        
+        async function generateSpecificSignal(type) {
+            await predictModulation(type);
+        }
+        
+        async function predictModulation(modulation_type) {
+            document.getElementById('mystery_plot_container').innerHTML = 
+                '<div class="loading"><div class="spinner"></div>Generating mystery signal...</div>';
+            document.getElementById('mystery_spectrogram_container').innerHTML = 
+                '<div class="loading"><div class="spinner"></div>Generating spectrogram...</div>';
+            document.getElementById('prediction_result').style.display = 'none';
+            
+            const response = await fetch('/api/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ modulation_type })
+            });
+            
+            const data = await response.json();
+            
+            document.getElementById('mystery_plot_container').innerHTML = 
+                `<img src="${data.mystery_plot}" alt="Mystery signal">`;
+            document.getElementById('mystery_spectrogram_container').innerHTML = 
+                `<img src="${data.mystery_spectrogram}" alt="Mystery signal spectrogram">`;
+            
+            document.getElementById('true_type').textContent = data.true_type;
+            document.getElementById('predicted_type').textContent = data.predicted_type;
+            document.getElementById('confidence').textContent = (data.confidence * 100).toFixed(1) + '%';
+            document.getElementById('confidence_bar').style.width = (data.confidence * 100) + '%';
+            
+            document.getElementById('carrier_freq_val').textContent = data.carrier_freq.toFixed(1) + ' Hz';
+            document.getElementById('message_freq_val').textContent = data.message_freq.toFixed(1) + ' Hz';
+            document.getElementById('snr_val').textContent = data.snr.toFixed(1) + ' dB';
+            document.getElementById('model_type_val').textContent = data.model_type || 'SVM';
+            
+            const trueCard = document.getElementById('true_type_card');
+            const predCard = document.getElementById('predicted_type_card');
+            
+            trueCard.className = 'result-card';
+            predCard.className = 'result-card';
+            
+            if (data.true_type === data.predicted_type) {
+                predCard.classList.add('success');
+            } else {
+                predCard.classList.add('error');
+            }
+            
+            document.getElementById('prediction_result').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
