@@ -131,6 +131,10 @@ pip install numpy matplotlib scipy scikit-learn jupyter notebook seaborn flask
 2. 浏览器会自动打开 http://127.0.0.1:5000
 3. 可以交互式地生成信号和测试AI识别
 
+## 快速预览
+
+下载.pdf或.pptx文件即可快速预览
+
 ## 作者信息
 
 - **Author**: mimi
